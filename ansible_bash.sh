@@ -14,3 +14,6 @@ sudo pip install --upgrade pip -y
 pip3 install awscli
 sudo pip install boto -y
 sudo pip install boto3 -y
+
+# Install tree for a nice visual on directories and sub-directories
+sudo apt install tree
