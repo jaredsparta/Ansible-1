@@ -47,7 +47,7 @@
 #####################
 # APP
 - name: prepares the app environment and runs the app
-  hosts: app_servers
+  hosts: app_server
   gather_facts: yes
 
   tasks:
@@ -102,11 +102,11 @@
   - name: set the DB_HOST variable within .bashrc
     lineinfile:
       path: /home/ubuntu/.bashrc
-      line: export DB_HOST=172.31.44.213
+      line: export DB_HOST=172.31.40.107
     become: true
 
   - name: create DB_HOST environment variable
-    shell: export DB_HOST=172.31.44.213
+    shell: export DB_HOST=172.31.40.107
 
 # copies app files, installs dependencies and starts the app
   - name: copy the app folders over to the host
@@ -122,5 +122,7 @@
     shell: |
       pm2 kill
       pm2 start app.js --update-env
+      export DB_HOST=172.31.40.107
+      pm2 reload app.js --update-env
     args:
       chdir: ~/app

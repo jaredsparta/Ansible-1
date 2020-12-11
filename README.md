@@ -58,9 +58,10 @@ ansible all -a "apt-get update" --become
 
 <br>
 
-## Templates
+## Templates and Variables
 - `template` is another Ansible module that uses the Jinja2 templating language
 
 - A Jinja template is simply a text file which can be generated in formats such as HTML, XML, CSV etc.
 
-- 
+- We will be able to interpolate (substitute) variables into them, making them dynamic.
+
