@@ -1,70 +1,22 @@
-# Ansible
+# Using Ansible to create a working app that communicates with a database
 
-- It's a configuration tool 
-
-<br>
-
-## Host file
-- Here you specify the hosts (within groups if wanted) and how to connect to them
-```yaml
-[host_a]
-3.249.253.143 ansible_connection=ssh ansible_ssh_private_key_file=/home/ubuntu/.ssh/eng74Jaredawskey.pem
-
-[host_b]
-172.31.47.217 ansible_connection=ssh ansible_ssh_private_key_file=/home/ubuntu/.ssh/eng74Jaredawskey.pem
-```
+## Pre-requisites
+- You will need a macOS or a Linux distribution to be able to use Ansible -- it will not work on a Windows OS
+    - In such a case you can use a VM
 
 <br>
 
-## Pinging a host
-```bash
-ansible all -m ping # pings all hosts
-ansible host_a -m ping # pings hosts within the group host_a
-```
+## How to use
+- First you will need to have a machine that will be the controller -- i.e. the control node for Ansible
+    - This node will be the one containing playbooks that will be used to provision our app and database machines
 
-<br>
+- You will need to clone this repo to be able to use these files and playbooks too
 
-## Running commands with sudo with ansible
-- The Ansible way of running bash commands as sudo is with the `--become` keyword
-```yaml
-ansible all -a "apt-get update" --become
-```
+- Once done, you will need two extra machines:
+    1. One to host our app
+    2. Another to host a database to communicate with the app
 
-<br>
-
-## Playbooks
-- Playbooks are written in YAML
-- The file starts after three dashes `---`
-- Indentation matters
-- To run commands use `ansible-playbook <name>`
-
-**Example:**
-```yaml
-# This is going to be our example Playbook which is written in YAML
-# Your YAML playbook file starts after three dashes
-
----
-# This example targets host_a_public
-
-- name: install sql # can be anything
-  hosts: host_a_public # specify a host or host group
-  gather_facts: yes # gathers facts/states of machine before running the playbook
-  become: true # become is used to run the commands as sudo
-
-  tasks:
-  - name: Install SQL DB
-    apt: pkg=mysql-server state=present
-```
-
-<br>
-
-## Templates and Variables
-- `template` is another Ansible module that uses the Jinja2 templating language
-
-- A Jinja template is simply a text file which can be generated in formats such as HTML, XML, CSV etc.
-
-- We will be able to interpolate (substitute) variables into them, making them dynamic.
-
-**How do you use variables in Ansible?**
-- There are a couple of ways of doing so:
-  1. You can capture the STDOUT of a task and use the `register` keyword to assign that output to a variable
+- Before using the playbooks, you will need to set the hosts up
+    - You can do this through changing `/etc/ansible/hosts`
+    - Inside this file you will need to define the relevant IP addresses for your app and database
+    
