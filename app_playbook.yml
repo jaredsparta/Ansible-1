@@ -1,0 +1,73 @@
+---
+# This bit installs the necessary packages for the app to work
+- name: Installs nodejs, nginx, pm2 and configures nginx as a reverse proxy to port 3000
+  hosts: host_a_private
+  gather_facts: yes
+  become: true
+
+  tasks:
+  - name: get the needed files for nodejs
+    get_url:
+      url: https://deb.nodesource.com/setup_12.x
+      dest: ~/
+      mode: 755
+
+  - name: run the nodejs bash script so nodejs can be installed
+    shell:
+      cmd: ~/setup_12.x
+
+  - name: install nodejs, nginx
+    apt:
+      name: 
+        - nodejs
+        - nginx
+      state: present
+      update_cache: yes
+
+  - name: install pm2
+    npm: 
+      name: pm2
+      global: yes
+      state: present
+
+  - name: copy in the config-file for reverse proxy
+    copy:
+      src: ~/playbooks/app-files/reverse-proxy.conf
+      dest: /etc/nginx/sites-available/reverse-proxy.conf
+
+  - name: create symlink from copied file to default
+    file:
+      src: /etc/nginx/sites-available/reverse-proxy.conf
+      dest: /etc/nginx/sites-enabled/default
+      state: link
+
+  - name: restart nginx for new config to take place
+    service:
+      name: nginx
+      state: restarted
+
+##############
+# copies the app stuff and starts the app
+# This part doesn't need sudo access
+- name: copy app files, npm install and start app
+  hosts: host_a_private
+  gather_facts: yes
+
+  tasks:
+  - name: copy the app stuff over to the host
+    copy: 
+      src: ~/playbooks/app-files/app
+      dest: ~/
+
+  - name: npm install the dependencies from package.json
+    npm:
+      path: ~/app
+
+  - name: stop any apps running with pm2
+    shell:
+      cmd: pm2 kill
+
+  - name: start the app
+    shell:
+      chdir: ~/app
+      cmd: pm2 start app.js --update-env

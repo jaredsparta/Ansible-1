@@ -1,6 +1,6 @@
 # Task 1
 ```
-Tiny exercise using Adhock commands:
+Tiny exercise using ad-hoc commands:
 
     1. check the uptime of a machine
 
@@ -10,4 +10,4 @@ Tiny exercise using Adhock commands:
 
 1. `ansible all -m command -a uptime`
 
-2. `ansible host_a_public -m apt -a "upgrade=yes" --become`
+2. `ansible host_a_public -m apt -a "upgrade=yes update_cache=yes" --become`

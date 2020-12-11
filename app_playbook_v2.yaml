@@ -1,0 +1,75 @@
+# The same playbook but all in one play
+---
+# This bit installs the necessary packages for the app to work
+- name: prepares the app environment and runs the app
+  hosts: app_servers
+  gather_facts: yes
+
+  tasks:
+  - name: get the needed files for nodejs
+    become: true
+    get_url:
+      url: https://deb.nodesource.com/setup_12.x
+      dest: ~/
+      mode: 755
+
+  - name: run the nodejs bash script so nodejs can be installed
+    become: true
+    shell:
+      cmd: ~/setup_12.x
+
+  - name: install nodejs, nginx
+    become: true
+    apt:
+      name: 
+        - nodejs
+        - nginx
+      state: present
+      update_cache: yes
+
+  - name: install pm2
+    become: true
+    npm: 
+      name: pm2
+      global: yes
+      state: present
+
+  - name: copy in the config-file for reverse proxy
+    become: true
+    copy:
+      src: ~/playbooks/app-files/reverse-proxy.conf
+      dest: /etc/nginx/sites-available/reverse-proxy.conf
+    notify:
+      - Changed nginx config file
+
+  - name: create symlink from copied file to default
+    become: true
+    file:
+      src: /etc/nginx/sites-available/reverse-proxy.conf
+      dest: /etc/nginx/sites-enabled/default
+      state: link
+
+#######################################
+### copies app files, installs dependencies and starts the app
+  - name: copy the app folders over to the host
+    copy: 
+      src: ~/playbooks/app-files/app
+      dest: ~/
+
+  - name: npm install the dependencies from package.json
+    npm:
+      path: ~/app
+
+  - name: stop any apps running with pm2 and starts it again
+    shell: |
+        pm2 kill
+        pm2 start app.js --update-env
+    args:
+      chdir: ~/app
+
+  handlers:
+  - name: restart nginx for new config to take place
+    become: true
+    service:
+      name: nginx
+      state: restarted

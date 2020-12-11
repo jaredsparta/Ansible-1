@@ -56,5 +56,11 @@ ansible all -a "apt-get update" --become
     apt: pkg=mysql-server state=present
 ```
 
+<br>
 
+## Templates
+- `template` is another Ansible module that uses the Jinja2 templating language
 
+- A Jinja template is simply a text file which can be generated in formats such as HTML, XML, CSV etc.
+
+- 
