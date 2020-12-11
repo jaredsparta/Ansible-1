@@ -72,7 +72,7 @@
       state: present
       update_cache: yes
 
-  - name: install pm2
+  - name: install pm2 using npm
     become: true
     npm: 
       name: pm2
@@ -114,9 +114,17 @@
       src: ~/playbooks/app-files/app
       dest: ~/
 
+  - name: ensures node_modules and package-lock.json are not present so we can use seeds
+    file: 
+      path: 
+        - ~/app/node_modules
+        - ~/app/package-lock.json
+      state: absent
+
   - name: npm install the dependencies from package.json
-    npm:
-      path: ~/app
+    shell:
+      chdir: ~/app
+      cmd: npm install
 
   - name: stops any app running with pm2 and starts it again
     shell: |

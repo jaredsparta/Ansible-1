@@ -65,3 +65,6 @@ ansible all -a "apt-get update" --become
 
 - We will be able to interpolate (substitute) variables into them, making them dynamic.
 
+**How do you use variables in Ansible?**
+- There are a couple of ways of doing so:
+  1. You can capture the STDOUT of a task and use the `register` keyword to assign that output to a variable
