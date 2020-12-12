@@ -10,5 +10,5 @@
 <br>
 
 ## How to use
-- Go into your Ansible controller and create `.yaml` files and copy+paste the contents of these into them
-- Of course you will have to change the corresponding IPs
+- Go into your Ansible controller and create `.yaml` (or `.yml`, depending on your inclination of file extensions) files and copy+paste the contents of these into them
+- Of course you will have to change the corresponding IPs to the ones you have

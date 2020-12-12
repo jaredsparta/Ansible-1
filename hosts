@@ -1,0 +1,13 @@
+# The inventory I used in this example
+all:
+  hosts:
+  # Input here the private IPv4 address of your database server
+    db_server:
+      ansible_host: 172.31.40.107
+
+  # Insert here the private IPv4 address of your app server
+    app_server:
+      ansible_host: 172.31.34.77
+
+  vars:
+    ansible_ssh_private_key_file: /home/ubuntu/.ssh/eng74Jaredawskey.pem

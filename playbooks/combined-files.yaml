@@ -47,10 +47,12 @@
 #####################
 # APP
 - name: prepares the app environment and runs the app
-  hosts: app_server
+  hosts: 
+    - app_server
+    - db_server
   gather_facts: yes
   vars:
-    database_priv_ip: 172.31.40.107
+    database_priv_ip: "{{ansible_all_ipv4_addresses[1]}}"
 
   tasks:
   - name: get the needed files for nodejs

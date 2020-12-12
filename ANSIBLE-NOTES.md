@@ -4,14 +4,68 @@
 
 <br>
 
-## Host file
+## Host file or Inventory
+- The default Inventory file is found within `/etc/ansible/hosts` in an Ubuntu server
+
 - Here you specify the hosts (within groups if wanted) and how to connect to them
-```yaml
+
+- The following is an example of a file using INI
+```INI
 [host_a]
 3.249.253.143 ansible_connection=ssh ansible_ssh_private_key_file=/home/ubuntu/.ssh/eng74Jaredawskey.pem
 
 [host_b]
 172.31.47.217 ansible_connection=ssh ansible_ssh_private_key_file=/home/ubuntu/.ssh/eng74Jaredawskey.pem
+```
+
+<br>
+
+- This is the same file written in YAML. Notice how there are repetitions.
+
+```yaml
+all:
+  hosts:
+    app_server:
+        ansible_host: 172.31.34.77
+        ansible_connection: ssh
+        ansible_ssh_private_key_file: /home/ubuntu/.ssh/eng74Jaredawskey.pem
+
+    db_server:
+        ansible_host: 172.31.40.107
+        ansible_connection: ssh
+        ansible_ssh_private_key_file: /home/ubuntu/.ssh/eng74Jaredawskey.pem
+```
+
+<br>
+
+- Again, this is the same file but written more efficiently. We can do this because these inventory variables apply to all the groups
+```yaml
+all:
+  hosts:
+      db_server:
+        ansible_host: 172.31.40.107
+
+      app_server:
+        ansible_host: 172.31.34.77
+
+  vars:
+    ansible_connection: ssh
+    ansible_ssh_private_key_file: /home/ubuntu/.ssh/eng74Jaredawskey.pem
+```
+
+<br>
+
+- What about the syntax when there are two or more ips in a group?
+
+```yaml
+all:
+  hosts:
+      db_server:
+        ansible_host: 172.31.40.107
+        ansible_host: 123.11.111.11
+  vars:
+    ansible_connection: ssh
+    ansible_ssh_private_key_file: /home/ubuntu/.ssh/eng74Jaredawskey.pem
 ```
 
 <br>
