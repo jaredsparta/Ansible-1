@@ -1,6 +1,11 @@
 # Ansible
 
-- It's a configuration tool 
+**CONTENTS**
+1. Inventories
+2. Pinging hosts
+3. Ad-hoc commands
+4. Playbooks
+5. Templates
 
 <br>
 
@@ -11,11 +16,11 @@
 
 - The following is an example of a file using INI
 ```INI
-[host_a]
-3.249.253.143 ansible_connection=ssh ansible_ssh_private_key_file=/home/ubuntu/.ssh/eng74Jaredawskey.pem
+[app_server]
+192.168.10.100 ansible_connection=ssh ansible_ssh_private_key_file=/home/ubuntu/.ssh/eng74Jaredawskey.pem
 
-[host_b]
-172.31.47.217 ansible_connection=ssh ansible_ssh_private_key_file=/home/ubuntu/.ssh/eng74Jaredawskey.pem
+[db_server]
+192.168.10.200 ansible_connection=ssh ansible_ssh_private_key_file=/home/ubuntu/.ssh/eng74Jaredawskey.pem
 ```
 
 <br>
@@ -25,28 +30,34 @@
 ```yaml
 all:
   hosts:
+    example.example.example.com
+
+  children:
     app_server:
-        ansible_host: 172.31.34.77
-        ansible_connection: ssh
-        ansible_ssh_private_key_file: /home/ubuntu/.ssh/eng74Jaredawskey.pem
+      ansible_host: 192.168.10.100
+      ansible_connection: ssh
+      ansible_ssh_private_key_file: /home/ubuntu/.ssh/eng74Jaredawskey.pem
 
     db_server:
-        ansible_host: 172.31.40.107
-        ansible_connection: ssh
-        ansible_ssh_private_key_file: /home/ubuntu/.ssh/eng74Jaredawskey.pem
+      ansible_host: 192.168.10.200
+      ansible_connection: ssh
+      ansible_ssh_private_key_file: /home/ubuntu/.ssh/eng74Jaredawskey.pem
 ```
 
 <br>
 
-- Again, this is the same file but written more efficiently. We can do this because these inventory variables apply to all the groups
+- Again, this is the same file but written more efficiently. We can do this because these inventory variables apply to all the groups.
 ```yaml
 all:
   hosts:
-      db_server:
-        ansible_host: 172.31.40.107
+    example.example.example.com
 
-      app_server:
-        ansible_host: 172.31.34.77
+  children:
+    app_server:
+      ansible_host: 192.168.10.100
+
+    db_server:
+      ansible_host: 192.168.10.200
 
   vars:
     ansible_connection: ssh
@@ -78,10 +89,21 @@ ansible host_a -m ping # pings hosts within the group host_a
 
 <br>
 
-## Running commands with sudo with ansible
+## Ad-hoc commands
+- While playbooks are good as they allow you to repeat tasks, ad-hoc commands are useful for tasks that you will rarely ever do
+  - Examples could be to turning off all the machines in an area
+  - Copy over some files once, and only once etc.
+
+- They achieve a form of idempotence by checking the current state before they begin and doing nothing unless the current state is different from the specified final state
+
+- An ad-hoc command looks like:
+```yaml
+$ ansible [pattern] -m [module] -a "[module options]"
+```
+
 - The Ansible way of running bash commands as sudo is with the `--become` keyword
 ```yaml
-ansible all -a "apt-get update" --become
+$ ansible all -a "apt-get update" --become
 ```
 
 <br>
@@ -144,4 +166,4 @@ ansible all -a "apt-get update" --become
       public: 192.168.10.100
       private: 192.168.10.200
 ```
-- Here, we create a variable dictionary `app-IP`. To reference the public IP or private IP we can call this variable using `{{app-IP["public"]}}
+- Here, we create a variable dictionary `app-IP`. To reference the public IP or private IP we can call this variable using `{{ app-IP["public"] }}

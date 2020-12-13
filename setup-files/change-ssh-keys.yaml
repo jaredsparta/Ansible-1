@@ -1,0 +1,29 @@
+---
+- name: add a new SSH key into the hosts
+  hosts: all
+  vars_prompt:
+    - name: pub_file
+      prompt: "Input the name of the public key in .ssh (e.g. id_rsa.pub -- MUST END IN .pub):"
+      private: no
+  
+  tasks:
+  # Will add the relevant public key file into the hosts
+  - name: copy over the file
+    copy:
+      src: /home/ubuntu/.ssh/{{ pub_file }}
+      dest: /home/ubuntu/.ssh/
+    become: true
+
+  # Will register the shell command as a variable we can call
+  - name: save the line as a variable
+    shell: 
+      cmd: cat "{{ pub_file }}"
+      chdir: /home/ubuntu/.ssh
+    register: key_contents
+
+  # Will add the stdout of the previous command as a new line into authorized_keys
+  - name: add the contents to authorized_keys
+    lineinfile:
+      path: /home/ubuntu/.ssh/authorized_keys
+      line: "{{ key_contents.stdout }}"
+    become: true

@@ -1,6 +1,8 @@
 ---
+#####################
+# DATABASE
 - name: installs mongodb 3.2.20, makes it listen to 0.0.0.0 and starts+enables it
-  hosts: db_servers
+  hosts: db_server
   gather_facts: yes
   become: true
 

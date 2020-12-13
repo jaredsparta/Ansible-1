@@ -1,0 +1,4 @@
+# Imports both playbooks and runs them in their order of declaration
+---
+- import_playbook: db.yml
+- import_playbook: app.yml

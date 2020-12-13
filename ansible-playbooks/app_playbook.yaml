@@ -1,58 +1,11 @@
-# Will first create the database and provision it correctly
-# Then sets up the app to communicate with it correctly
 ---
-
-#####################
-# DATABASE
-- name: installs mongodb 3.2.20, makes it listen to 0.0.0.0 and starts+enables it
-  hosts: db_server
-  gather_facts: yes
-  become: true
-
-  tasks:
-  - name: add the GPG key for mongoDB 3.2
-    apt_key:
-      url: https://www.mongodb.org/static/pgp/server-3.2.asc
-      state: present
-      
-  - name: create a /etc/apt/sources.list.d/mongodb-org-3.2.list file
-    copy:
-      dest: "/etc/apt/sources.list.d/mongodb-org-3.2.list"
-      content: |
-        deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.2 multiverse
-
-  - name: install mongodb 3.2.20
-    apt:
-      name: 
-      - mongodb-org=3.2.20
-      - mongodb-org-server=3.2.20
-      - mongodb-org-mongos=3.2.20
-      - mongodb-org-tools=3.2.20
-      state: present
-      update_cache: yes
-
-  - name: change the bind ip in /etc/mongod.conf
-    replace:
-      path: /etc/mongod.conf
-      regexp: '^(  bindIp: 127.0.0.1)$'
-      replace: '  bindIp: 0.0.0.0'
-
-  - name: enable and start mongod
-    systemd:
-      name: mongod
-      state: started
-      enabled: yes
-
-
 #####################
 # APP
 - name: prepares the app environment and runs the app
-  hosts: 
-    - app_server
-    - db_server
+  hosts: app_server
   gather_facts: yes
   vars:
-    database_priv_ip: "{{ansible_all_ipv4_addresses[1]}}"
+    database_priv_ip: "{{ hostvars['db_server']['ansible_host'] }}"
 
   tasks:
   - name: get the needed files for nodejs
@@ -86,7 +39,7 @@
   - name: copy in the config-file for reverse proxy
     become: true
     copy:
-      src: ~/playbooks/app-files/reverse-proxy.conf
+      src: /home/ubuntu/Ansible-1/app-files/reverse-proxy.conf
       dest: /etc/nginx/sites-available/reverse-proxy.conf
 
   - name: create symlink from copied file to default
@@ -109,26 +62,26 @@
       line: export DB_HOST={{ database_priv_ip }}
     become: true
 
-  - name: create DB_HOST environment variable
-    shell: export DB_HOST={{ database_priv_ip }}
-
 # copies app files, installs dependencies and starts the app
   - name: copy the app folders over to the host
     copy: 
-      src: ~/playbooks/app-files/app
-      dest: ~/
+      src: /home/ubuntu/Ansible-1/app-files/app
+      dest: /home/ubuntu/
+    become: true
 
   - name: ensures node_modules and package-lock.json are not present so we can use seeds
     file: 
       path: 
-        - ~/app/node_modules
-        - ~/app/package-lock.json
+        - /home/ubuntu/app/node_modules
+        - /home/ubuntu/app/package-lock.json
       state: absent
+    become: true
 
   - name: npm install the dependencies from package.json
     shell:
-      chdir: ~/app
+      chdir: /home/ubuntu/app
       cmd: npm install
+    become: true
 
   - name: stops any app running with pm2 and starts it again
     shell: |
@@ -137,4 +90,4 @@
       export DB_HOST={{ database_priv_ip }}
       pm2 reload app.js --update-env
     args:
-      chdir: ~/app
+      chdir: /home/ubuntu/app

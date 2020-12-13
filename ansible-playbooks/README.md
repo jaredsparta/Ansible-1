@@ -11,4 +11,6 @@
 
 ## How to use
 - Go into your Ansible controller and create `.yaml` (or `.yml`, depending on your inclination of file extensions) files and copy+paste the contents of these into them
-- Of course you will have to change the corresponding IPs to the ones you have
+    - Otherwise, just follow the instructions found in the README in the root
+
+- You can run Ansible playbooks with the command `ansible-playbook <name-of-playbook>`
