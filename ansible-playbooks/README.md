@@ -14,3 +14,8 @@
     - Otherwise, just follow the instructions found in the README in the root
 
 - You can run Ansible playbooks with the command `ansible-playbook <name-of-playbook>`
+
+<br>
+
+## How to change the playbooks
+- Notice that `both.yaml` only uses the `import` keywords, in this case you will only ever need to change the app or database playbook

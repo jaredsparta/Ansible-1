@@ -3,7 +3,7 @@
   hosts: all
   vars_prompt:
     - name: pub_file
-      prompt: "Input the name of the public key in .ssh (e.g. id_rsa.pub -- MUST END IN .pub):"
+      prompt: "Input the name of the public key in .ssh (e.g. id_rsa.pub -- MUST END IN .pub)"
       private: no
   
   tasks:

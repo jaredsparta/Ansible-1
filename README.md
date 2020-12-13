@@ -5,7 +5,7 @@
 - This makes use of three EC2 instances (or nodes) where one node (the controller) will automate the task of preparing the other two nodes
 
 - A massive benefit that Ansible gives us is that we no longer need to SSH into a machine and manually set up the environment
-    - It follows that the instructions in the following relate purely to the control node
+    - It follows that the instructions in the following relate solely to the control node
 
 <br>
 
@@ -28,45 +28,68 @@
 <br>
 
 **Step-by-step**
+1. The first step is to SSH into your controller node
 
-- As mentioned, you will only need to work with the control node. In such a case, you will need to first SSH into your controller instance
+2. Then navigate to the home directory via `cd ~`
+    - Note: If `ubuntu` is not the user you have logged into this path will not work. In such a case you will have to `cd /home/ubuntu` instead
+    - In the following, the home directory will refer to the home directory of the `ubuntu` user
 
-- You will need to clone this repo to be able to use these files 
-    1. Inside your controller, `cd` to the home directory and clone this repo there
-    2. Run the shell script `install-ansible.sh` with the command `bash install-ansible.sh`
-    > The file can be found in `setup-files`
-    3. You will need to `scp` your AWS key file into this machine too. Put the key into `~/.ssh`. The key must be the same one thet can be used to SSH into the two other instances.
+3. You will need to clone this repo there
+    - Do so with the command `git clone https://github.com/jaredsparta/Ansible-1.git`
 
-> The paths inside the playbooks will only work if you `git clone` when in the home directory
+4. Then navigate to `setup-files`
+    - You can do so with `cd ~/Ansible-1/setup-files`
 
-- Finally, you will need to change three things found in `setup-files/hosts`
-    1. Switch the IP address of `db_server` to your one
-    2. Switch the IP address of `app_server` to your one
-    3. Switch the path of the AWS key to your one
+5. Run `install-ansible.sh`
+    - The file in the repo is not an executable so run it with `bash install-ansible.sh`
 
-> The `hosts` file will need to be appended to reflect the IP's of your app and database as well as the relevant AWS key. You will only need to change the IP's found in the `hosts` file.
+6. You will need a copy of the AWS key(s) used to SSH into the app and database instances
+    - Find them in your local machine and `scp` them into the controller node
+    - Copy them into the `~/.ssh` directory in the controller
+    
+7. Once the key(s) is inside `.ssh` you will need to change permissions as it is currently too open
+    - Run the command `sudo chmod 600 <key-file>` to do so
 
-- You are now ready to run the playbooks. Navigate to `ansible-playbooks` to do so
-    - You can run it via `ansible-playbook both.yaml`
-    - If you would like to change the behaviour of some of the commands, you can do so by changing the relevant playbooks `app_playbook.yaml` or `db_playbook.yaml`
+8. You will now need to change the `hosts` file to reflect your own instances
+    - Change the app and database IP addresses to the ones you have
+    - You will also need to change the SSH key path at the bottom to the one you have
+    - If each instance has a different key then the hosts file should look like this;
+    ```yaml
+    all:
+      hosts:
+        db_server:
+          ansible_host: 172.31.40.107
+          ansible_ssh_private_key_file: <path-to-file>
+
+        app_server:
+          ansible_host: 172.31.34.77
+          ansible_ssh_private_key_file: <path-to-file>
+    ```
+
+9. Setup is now complete and we can move onto running playbooks. Navigate to `Ansible-1/ansible-playbooks`
+    - This can be done via `cd ~/Ansible-1/ansible-playbooks`
+
+10. Run the `both.yaml` playbook to prepare both
+    - Use the command `ansible-playbook both.yaml`
+    - If you just want to run a single playbook you can use `ansible-playbook <name-of-playbook>`
 
 <br>
 
 **Optional**
 
-- **Only do the following once the previous steps have been done**
+- **Only do the following once you have completed the first 8 steps**
 
 - If you would like to use separate keys for Ansible, go into `~/.ssh` inside your control node and run the command `ssh-keygen`.
     - This will create two new files called `id_rsa` and `id_rsa.pub` if no name is given, otherwise they will be called `<name>` and `<name>.pub` 
 
-- You will now need to use the AWS key you have
-    - What we need to do is give the public key we have just generated to each of the instances. We do this by adding the contents of the `.pub` file as a line into the `~/.ssh/authorized_keys` file found in both instances
+- We will now need to add the public key to the list of authorised keys in the app and database nodes
 
-- Once the key has been created, you can run `change-ssh-keys.yaml` within `setup-files`
+- Once the keys have been created, you can run `change-ssh-keys.yaml` within `setup-files`
     - Ensure you input the `.pub` key, NOT the private key
     - Run it via `ansible-playbook change-ssh-keys.yaml`
 
 - Finally, you will need to once again change the `hosts` file
     - Change the key file in `vars` to the private key of the key you have just made
+    - The private key will have the same name as the public key but without the extension `.pub`
 
 > Notice how you will need the AWS key regardless of whether or not you wish to have separate keys for Ansible to use, so ensure you have it ready
